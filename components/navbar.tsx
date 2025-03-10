@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { BookOpen, LogOut, User, Menu, X, GraduationCap, Shield } from "lucide-react";
+import { BookOpen, LogOut, User, Menu, X, GraduationCap, Shield, Home, BookOpenCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getCurrentUser, logout, User as UserType } from "@/lib/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,6 +22,7 @@ export function Navbar() {
   const [user, setUser] = useState<UserType | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -39,6 +40,22 @@ export function Navbar() {
     };
     
     checkUser();
+    
+    // Add scroll event listener
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -67,7 +84,13 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-gray/50 shadow-sm border-b sticky top-0 z-10">
+    <nav 
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+        scrolled 
+          ? "bg-white shadow-md" 
+          : "bg-white/95 backdrop-blur-sm border-b"
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex items-center">
@@ -75,13 +98,27 @@ export function Navbar() {
               <BookOpen className="h-6 w-6 text-primary" />
               <span className="font-bold text-xl">EduSphere</span>
             </Link>
+            
+            {/* Desktop Navigation Links */}
+            <div className="hidden md:flex ml-10 space-x-8">
+              <Link href="/" className="flex items-center text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                <Home className="mr-1 h-4 w-4" />
+                Home
+              </Link>
+              {user && (
+                <Link href={`/${user.role}/profile`} className="flex items-center text-sm font-medium text-gray-700 hover:text-primary transition-colors">
+                  <BookOpenCheck className="mr-1 h-4 w-4" />
+                  My Dashboard
+                </Link>
+              )}
+            </div>
           </div>
 
           {/* Login status indicator - Desktop */}
           <div className="hidden md:flex items-center">
             {!isLoading && (
               <div className="mr-4">
-                <Badge variant={user ? "outline" : "secondary"} className="px-3 py-1">
+                <Badge variant={user ? "outline" : "secondary"} className="px-3 py-1 bg-white">
                   {user ? (
                     <div className="flex items-center space-x-1">
                       {getRoleIcon(user.role)}
@@ -101,7 +138,8 @@ export function Navbar() {
           <div className="flex md:hidden items-center">
             <button
               onClick={toggleMobileMenu}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+              className="inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
+              aria-expanded={isMobileMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
               {isMobileMenuOpen ? (
@@ -164,12 +202,28 @@ export function Navbar() {
 
       {/* Mobile menu, show/hide based on menu state */}
       {isMobileMenuOpen && (
-        <div className="md:hidden">
-          <div className="pt-2 pb-3 space-y-1 border-t">
+        <div className="md:hidden bg-white border-t">
+          <div className="pt-2 pb-3 space-y-1">
+            {/* Mobile Navigation Links */}
+            <Link href="/" className="block px-4 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md">
+              <div className="flex items-center">
+                <Home className="mr-3 h-5 w-5" />
+                Home
+              </div>
+            </Link>
+            {user && (
+              <Link href={`/${user.role}/profile`} className="block px-4 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md">
+                <div className="flex items-center">
+                  <BookOpenCheck className="mr-3 h-5 w-5" />
+                  My Dashboard
+                </div>
+              </Link>
+            )}
+            
             {/* Login status indicator - Mobile */}
             {!isLoading && (
               <div className="px-4 py-2">
-                <Badge variant={user ? "outline" : "secondary"} className="w-full flex justify-center px-3 py-1">
+                <Badge variant={user ? "outline" : "secondary"} className="w-full flex justify-center px-3 py-1 bg-white">
                   {user ? (
                     <div className="flex items-center space-x-1">
                       {getRoleIcon(user.role)}
@@ -201,7 +255,7 @@ export function Navbar() {
                   </div>
                 </div>
                 <div className="space-y-1">
-                  <Link href={`/${user.role}/profile`} className="block px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md">
+                  <Link href={`/${user.role}/profile`} className="block px-4 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md">
                     <div className="flex items-center">
                       <User className="mr-3 h-5 w-5" />
                       Profile
@@ -209,7 +263,7 @@ export function Navbar() {
                   </Link>
                   <button 
                     onClick={handleLogout}
-                    className="w-full text-left px-4 py-2 text-base font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-md"
+                    className="w-full text-left px-4 py-2 text-base font-medium text-gray-700 hover:text-primary hover:bg-gray-50 rounded-md"
                   >
                     <div className="flex items-center">
                       <LogOut className="mr-3 h-5 w-5" />

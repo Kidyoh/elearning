@@ -10,7 +10,6 @@ import { getCurrentUser, logout, User as UserType } from "@/lib/auth";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 
 export default function StudentProfile() {
   const [user, setUser] = useState<UserType | null>(null);
@@ -169,7 +168,12 @@ export default function StudentProfile() {
                       <span>Progress</span>
                       <span className="font-medium">75%</span>
                     </div>
-                    <Progress value={75} className="h-2" />
+                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary" 
+                        style={{ width: '75%' }}
+                      ></div>
+                    </div>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="mr-2 h-4 w-4" />
@@ -190,7 +194,12 @@ export default function StudentProfile() {
                       <span>Progress</span>
                       <span className="font-medium">30%</span>
                     </div>
-                    <Progress value={30} className="h-2" />
+                    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-primary" 
+                        style={{ width: '30%' }}
+                      ></div>
+                    </div>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="mr-2 h-4 w-4" />
